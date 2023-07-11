@@ -13,6 +13,7 @@ class ExerciseActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        supportActionBar?.hide()
         setContentView(R.layout.activity_exercise)
 
         val pushUps = intent.getIntExtra("pushUps", 0)
