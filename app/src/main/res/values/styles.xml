@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    ...
+    <style name="Border" parent="android:style/Widget">
+        <item name="android:background">@drawable/border</item>
+    </style>
+    ...
+</resources>
