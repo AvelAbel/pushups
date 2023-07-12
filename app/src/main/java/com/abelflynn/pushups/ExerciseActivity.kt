@@ -1,9 +1,11 @@
 package com.abelflynn.pushups
 
+import android.media.MediaPlayer
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import android.widget.ImageView
 import android.widget.TextView
 
@@ -11,6 +13,7 @@ class ExerciseActivity : AppCompatActivity() {
 
     private lateinit var pushupImageView: ImageView
     private lateinit var counterTextView: TextView
+    private lateinit var soundSelection: String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -18,7 +21,9 @@ class ExerciseActivity : AppCompatActivity() {
         setContentView(R.layout.activity_exercise)
 
         val pushUps = intent.getIntExtra("pushUps", 0)
-        val mode = intent.getStringExtra("mode")
+        val mode = intent.getStringExtra("mode") ?: "Средний"
+        soundSelection = intent.getStringExtra("soundSelection") ?: "Нет"
+
 
         var riseDuration: Long = 50L // значение по умолчанию
 
@@ -77,6 +82,9 @@ class ExerciseActivity : AppCompatActivity() {
                         if (counterTextView.text.toString().toInt() < pushUps) {
                             counterTextView.text = (counterTextView.text.toString().toInt() + 1).toString()
                         }
+
+                        // Play sound when reaching 1
+                        playSound(soundSelection, true)
                     } else {
                         counter++
                     }
@@ -84,6 +92,9 @@ class ExerciseActivity : AppCompatActivity() {
                     if (counter >= fallDuration) {
                         isRising = true
                         counter = 0
+
+                        // Play sound when reaching 0
+                        playSound(soundSelection, false)
                     } else {
                         counter++
                     }
@@ -92,4 +103,33 @@ class ExerciseActivity : AppCompatActivity() {
             }
         })
     }
+
+    private fun playSound(selection: String, isRise: Boolean) {
+        Log.d("PlaySound", "playSound called with selection: $selection, isRise: $isRise")
+
+        val sound = when (selection) {
+            "Виолончель" -> if (isRise) R.raw.viol2 else R.raw.viol1
+            "Клик" -> if (isRise) R.raw.click2 else R.raw.click1
+            "Капля" -> if (isRise) R.raw.bulk2 else R.raw.bulk1
+            "Дыхание" -> if (isRise) R.raw.vdyh else R.raw.vydoh
+            "Опасность" -> if (isRise) R.raw.puk2 else R.raw.puk1
+            else -> null
+        }
+
+        Log.d("PlaySound", "Selected sound: $sound")
+
+        if (sound != null) {
+            Log.d("PlaySound", "Creating and playing MediaPlayer with sound: $sound")
+            val mediaPlayer = MediaPlayer.create(applicationContext, sound)
+            mediaPlayer.setOnCompletionListener {
+                Log.d("PlaySound", "MediaPlayer completed playing sound: $sound")
+                it.release()
+            }
+            mediaPlayer.start()
+        } else {
+            Log.d("PlaySound", "Sound was null, not playing any sound")
+        }
+    }
+
+
 }

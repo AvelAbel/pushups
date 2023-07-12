@@ -5,4 +5,12 @@
         <item>Средний</item>
         <item>Быстрый</item>
     </string-array>
+    <string-array name="sound_array">
+        <item>Нет</item>
+        <item>Виолончель</item>
+        <item>Клик</item>
+        <item>Капля</item>
+        <item>Дыхание</item>
+        <item>Опасность</item>
+    </string-array>
 </resources>
