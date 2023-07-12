@@ -24,11 +24,13 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <com.abelflynn.pushups.ScaleView
-                android:id="@+id/scaleView"
+            <ImageView
+                android:id="@+id/pushupImageView"
                 android:layout_width="match_parent"
-                android:layout_height="500dp"
-                android:layout_marginTop="7dp" />
+                android:layout_height="wrap_content"
+                android:src="@drawable/pushups0"
+                android:scaleType="centerCrop"/>
+
 
             <TextView
                 android:id="@+id/counterTextView"
