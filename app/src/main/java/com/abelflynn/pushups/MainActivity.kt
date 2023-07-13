@@ -3,6 +3,7 @@ package com.abelflynn.pushups
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.os.CountDownTimer
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
@@ -23,30 +24,28 @@ class MainActivity : AppCompatActivity() {
 
         val pushUpsSpinner: Spinner = findViewById(R.id.pushUpsSpinner)
         val modeSpinner: Spinner = findViewById(R.id.modeSpinner)
-        val soundSpinner: Spinner = findViewById(R.id.soundSpinner) // замените id на id вашего Spinner для звуков
+        val soundSpinner: Spinner = findViewById(R.id.soundSpinner)
         val startButton: Button = findViewById(R.id.startButton)
 
-        // Восстановление выбранного режима, количества отжиманий и звука
         val sharedPref = getPreferences(Context.MODE_PRIVATE) ?: return
         selectedPushUps = sharedPref.getInt("selectedPushUps", 1)
         selectedMode = sharedPref.getString("selectedMode", "Средний") ?: "Средний"
-        selectedSound = sharedPref.getString("selectedSound", "Капля") ?: "Капля" // по умолчанию выбрана "Капля"
+        selectedSound = sharedPref.getString("selectedSound", "Капля") ?: "Капля"
 
-        val soundArray = resources.getStringArray(R.array.sound_array) // замените на массив со значениями звуков
+        val soundArray = resources.getStringArray(R.array.sound_array)
         ArrayAdapter.createFromResource(
             this,
-            R.array.sound_array,  // замените на массив со значениями звуков
+            R.array.sound_array,
             android.R.layout.simple_spinner_item
         ).also { adapter ->
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
             soundSpinner.adapter = adapter
-            soundSpinner.setSelection(soundArray.indexOf(selectedSound)) // Установка начального положения
+            soundSpinner.setSelection(soundArray.indexOf(selectedSound))
         }
 
         soundSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                 selectedSound = soundArray[position]
-                // Сохранение выбранного звука
                 with(sharedPref.edit()) {
                     putString("selectedSound", selectedSound)
                     apply()
@@ -59,7 +58,7 @@ class MainActivity : AppCompatActivity() {
         val pushUpsArray = Array(200) { i -> (i + 1).toString() }
         val pushUpsAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, pushUpsArray)
         pushUpsSpinner.adapter = pushUpsAdapter
-        pushUpsSpinner.setSelection(selectedPushUps - 1) // Установка начального положения
+        pushUpsSpinner.setSelection(selectedPushUps - 1)
 
         val modeArray = resources.getStringArray(R.array.mode_array)
         ArrayAdapter.createFromResource(
@@ -69,14 +68,12 @@ class MainActivity : AppCompatActivity() {
         ).also { adapter ->
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
             modeSpinner.adapter = adapter
-            modeSpinner.setSelection(modeArray.indexOf(selectedMode)) // Установка начального положения
+            modeSpinner.setSelection(modeArray.indexOf(selectedMode))
         }
 
-        // Обработка выбора в спиннерах
         pushUpsSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
-                selectedPushUps = position + 1 // Позиция начинается с 0, отжимания - с 1
-                // Сохранение выбранного количества отжиманий
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                selectedPushUps = position + 1
                 with(sharedPref.edit()) {
                     putInt("selectedPushUps", selectedPushUps)
                     apply()
@@ -87,9 +84,8 @@ class MainActivity : AppCompatActivity() {
         }
 
         modeSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
+            override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
                 selectedMode = modeArray[position]
-                // Сохранение выбранного режима
                 with(sharedPref.edit()) {
                     putString("selectedMode", selectedMode)
                     apply()
@@ -100,11 +96,21 @@ class MainActivity : AppCompatActivity() {
         }
 
         startButton.setOnClickListener {
-            val intent = Intent(this, ExerciseActivity::class.java)
-            intent.putExtra("pushUps", selectedPushUps)
-            intent.putExtra("mode", selectedMode)
-            intent.putExtra("soundSelection", selectedSound)
-            startActivity(intent)
+            startButton.isEnabled = false
+            object: CountDownTimer(4000, 1000) {
+                override fun onTick(millisUntilFinished: Long) {
+                    startButton.text = "Старт через ${millisUntilFinished / 1000}"
+                }
+                override fun onFinish() {
+                    val intent = Intent(this@MainActivity, ExerciseActivity::class.java)
+                    intent.putExtra("pushUps", selectedPushUps)
+                    intent.putExtra("mode", selectedMode)
+                    intent.putExtra("soundSelection", selectedSound)
+                    startActivity(intent)
+                    startButton.isEnabled = true
+                    startButton.text = "Начать"
+                }
+            }.start()
         }
     }
 }

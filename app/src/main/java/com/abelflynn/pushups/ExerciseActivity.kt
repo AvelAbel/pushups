@@ -14,6 +14,17 @@ class ExerciseActivity : AppCompatActivity() {
     private lateinit var pushupImageView: ImageView
     private lateinit var counterTextView: TextView
     private lateinit var soundSelection: String
+    private var mediaPlayer: MediaPlayer? = null
+    private var exerciseRunnable: Runnable? = null
+    private var exerciseHandler = Handler(Looper.getMainLooper())
+
+    override fun onPause() {
+        super.onPause()
+        mediaPlayer?.release()
+        mediaPlayer = null
+        exerciseHandler.removeCallbacks(exerciseRunnable!!)
+    }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -28,9 +39,9 @@ class ExerciseActivity : AppCompatActivity() {
         var riseDuration: Long = 50L // значение по умолчанию
 
         when (mode) {
-            "Медленный" -> riseDuration = 100L
+            "Медленный" -> riseDuration = 80L
             "Средний" -> riseDuration = 50L
-            "Быстрый" -> riseDuration = 20L
+            "Быстрый" -> riseDuration = 35L
         }
 
         pushupImageView = findViewById(R.id.pushupImageView)
@@ -38,11 +49,11 @@ class ExerciseActivity : AppCompatActivity() {
         counterTextView.text = "0"
 
         val handler = Handler(Looper.getMainLooper())
+        val fallDuration = riseDuration * 2 // продолжительность падения в миллисекундах
         var isRising = false
         var counter = 0
-        val fallDuration = riseDuration * 2 // продолжительность падения в миллисекундах
 
-        handler.post(object : Runnable {
+        exerciseRunnable = object : Runnable {
             override fun run() {
                 if (counterTextView.text.toString().toInt() >= pushUps) {
                     pushupImageView.setImageResource(R.drawable.pushupsfinal)
@@ -99,9 +110,10 @@ class ExerciseActivity : AppCompatActivity() {
                         counter++
                     }
                 }
-                handler.postDelayed(this, 1)
+                exerciseHandler.postDelayed(this, 1)
             }
-        })
+        }
+        exerciseHandler.post(exerciseRunnable!!)
     }
 
     private fun playSound(selection: String, isRise: Boolean) {
@@ -120,16 +132,14 @@ class ExerciseActivity : AppCompatActivity() {
 
         if (sound != null) {
             Log.d("PlaySound", "Creating and playing MediaPlayer with sound: $sound")
-            val mediaPlayer = MediaPlayer.create(applicationContext, sound)
-            mediaPlayer.setOnCompletionListener {
+            mediaPlayer = MediaPlayer.create(applicationContext, sound)
+            mediaPlayer?.setOnCompletionListener {
                 Log.d("PlaySound", "MediaPlayer completed playing sound: $sound")
                 it.release()
             }
-            mediaPlayer.start()
+            mediaPlayer?.start()
         } else {
             Log.d("PlaySound", "Sound was null, not playing any sound")
         }
     }
-
-
 }
